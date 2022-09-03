@@ -1,0 +1,33 @@
+name: build
+
+on:
+  schedule:
+  - cron: "0 * * * *"
+  
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: NPM Install
+        run: npm install
+
+      - name: Build
+        run: node index.js
+        env:
+          GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release
+        run: |
+          echo 'node_modules' > .gitignore
+          echo '.*' >> .gitignore
+          git config --global user.email "evm-golf@github.io"
+          git config --global user.name "evm-golf"
+          git checkout -b release
+          git add .
+          git commit -m release
+          git push -u origin release -f
